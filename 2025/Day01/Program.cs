@@ -1,29 +1,25 @@
 ﻿string[] lines = File.ReadAllLines("input.txt");
 
-int start = 50;
-
-int GetPassword(int start)
+int Solve()
 {
-    int count = 0;
+    int pos = 50;
+    int hits = 0;
 
-    foreach (string line in lines)
+    foreach (var line in lines)
     {
-        char direction = line[0];
+        char dir = line[0];
         int amount = int.Parse(line[1..]);
+        int step = dir == 'R' ? 1 : -1;
 
-        if (direction == 'L')
-            start -= amount;
-        else
-            start += amount;
-
-        // stay between 0–99
-        start = (start % 100 + 100) % 100;
-
-        if (start == 0)
-            count++;
+        for (int i = 0; i < amount; i++)
+        {
+            pos = (pos + step + 100) % 100;
+            if (pos == 0)
+                hits++;
+        }
     }
 
-    return count;
+    return hits;
 }
 
-Console.WriteLine(GetPassword(start));
+Console.WriteLine(Solve());
