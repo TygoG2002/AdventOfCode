@@ -9,18 +9,42 @@ namespace Day02
     public static class Extensions
     {
 
-        public static Dictionary<string, string> splitInHalf(this string value)
+        public static Dictionary<long, long> splitInHalf(this string value)
         {
+            if(value.Length == 1)
+            {
+                return null;
+            }
 
             int middle = value.Count(char.IsDigit) / 2;
 
             string firstValue = value[0..middle];
             string lastValue = value[middle..];
 
-            return new Dictionary<string, string>() { { firstValue, lastValue }
+            if (!long.TryParse(firstValue, out long start) || !long.TryParse(lastValue, out long end))
+            {
+                throw new ArgumentException("Invalid numeric values");
+            }
+
+            return new Dictionary<long, long> {
+                { start, end }
 };
+
+
+
+
         }
 
+        public static bool IsInvalidId(this long id)
+        {
+            string s = id.ToString();
+
+            if (s.Length % 2 != 0)
+                return false;
+
+            int half = s.Length / 2;
+            return s[..half] == s[half..];
+        }
 
 
         public static List<string> SplitBasedOnSeparator(this string value,char separator)
