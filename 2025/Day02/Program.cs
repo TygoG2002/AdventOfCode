@@ -3,6 +3,9 @@
 string input = File.ReadAllText("input.txt").Trim();
 long sum = 0;
 
+
+//TODO finish second part of the puzzle  
+
 foreach (var range in input.SplitBasedOnSeparator(','))
 {
     var parts = range.SplitBasedOnSeparator('-');
@@ -21,10 +24,12 @@ foreach (var range in input.SplitBasedOnSeparator(','))
 
         for (long half = minHalf; half <= maxHalf; half++)
         {
+
+          
             long full = long.Parse(half.ToString() + half.ToString());
 
             if (full < start)
-                continue;
+                continue;   
 
             if (full > end)
                 break;
