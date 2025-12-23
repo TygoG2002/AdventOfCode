@@ -1,51 +1,114 @@
-﻿string[] lines = File.ReadAllLines("input.txt");
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 
-int totalNumberOfPaperRolls = 0;
-
-for(int i = 0; i < lines.Length; i++){
-
-    string currentLine = lines[i];
-    string? previousLine = i > 0 ? lines[i - 1] : null;
-    string? nextLine = i < lines.Length - 1 ? lines[i + 1] : null;
-
-    int currentLineIndex = i;
-
-    for (int j = 0; j< currentLine.Length; j++)
+class Program
+{
+    static void Main()
     {
-        int neighborCount = 0;
+        string[] inputLines = File.ReadAllLines("input.txt");
 
-        if (currentLine[j] != '@')
-            continue;
+        int totalRowCount = inputLines.Length;
+        int totalColumnCount = inputLines[0].Length;
 
+        char[,] paperGrid = new char[totalRowCount, totalColumnCount];
 
-        int indexOfCurrentValue = j;
-
-        bool left = indexOfCurrentValue != 0 && currentLine[j - 1] == '@';
-        bool right = indexOfCurrentValue != (currentLine.Length-1) && currentLine[j + 1] == '@';
-        bool top = previousLine != null && previousLine[j] == '@';
-        bool bottom = nextLine != null && nextLine[indexOfCurrentValue] == '@';
-        bool currentValue = currentLine[j] == '@';
-
-        bool topLeft = previousLine != null && indexOfCurrentValue != 0 && previousLine[j - 1] == '@';
-        bool topRight = previousLine != null && indexOfCurrentValue != (currentLine.Length - 1) && previousLine[j + 1] == '@';
-        bool bottomLeft = nextLine != null && indexOfCurrentValue != 0 && nextLine[j - 1] == '@';
-        bool bottomRight = nextLine != null && indexOfCurrentValue != (currentLine.Length - 1) && nextLine[j + 1] == '@';
-
-        if (left) neighborCount++;
-        if (right) neighborCount++;
-        if (top) neighborCount++;
-        if (bottom) neighborCount++;
-        if (topLeft) neighborCount++;
-        if (topRight) neighborCount++;
-        if (bottomLeft) neighborCount++;
-        if (bottomRight) neighborCount++;
-
-        if (neighborCount < 4)
+        for (int rowIndex = 0; rowIndex < totalRowCount; rowIndex++)
         {
-            totalNumberOfPaperRolls++;
+            for (int columnIndex = 0; columnIndex < totalColumnCount; columnIndex++)
+            {
+                paperGrid[rowIndex, columnIndex] = inputLines[rowIndex][columnIndex];
+            }
         }
 
+        int accessibleRollCount = 0;
+
+        for (int rowIndex = 0; rowIndex < totalRowCount; rowIndex++)
+        {
+            for (int columnIndex = 0; columnIndex < totalColumnCount; columnIndex++)
+            {
+                if (paperGrid[rowIndex, columnIndex] != '@')
+                    continue;
+
+                int adjacentRollCount = CountAdjacentPaperRolls(
+                    paperGrid,
+                    rowIndex,
+                    columnIndex,
+                    totalRowCount,
+                    totalColumnCount
+                );
+
+                if (adjacentRollCount < 4)
+                    accessibleRollCount++;
+            }
+        }
+
+        Console.WriteLine($"Part 1: {accessibleRollCount}");
+
+        int totalRemovedRollCount = 0;
+
+        while (true)
+        {
+            List<(int rowIndex, int columnIndex)> rollsToRemove = new();
+
+            for (int rowIndex = 0; rowIndex < totalRowCount; rowIndex++)
+            {
+                for (int columnIndex = 0; columnIndex < totalColumnCount; columnIndex++)
+                {
+                    if (paperGrid[rowIndex, columnIndex] != '@')
+                        continue;
+
+                    int adjacentRollCount = CountAdjacentPaperRolls(
+                        paperGrid,
+                        rowIndex,
+                        columnIndex,
+                        totalRowCount,
+                        totalColumnCount
+                    );
+
+                    if (adjacentRollCount < 4)
+                        rollsToRemove.Add((rowIndex, columnIndex));
+                }
+            }
+
+            if (rollsToRemove.Count == 0)
+                break;
+
+            foreach (var (rowIndex, columnIndex) in rollsToRemove)
+            {
+                paperGrid[rowIndex, columnIndex] = '.';
+                totalRemovedRollCount++;
+            }
+        }
+
+        Console.WriteLine($"Part 2: {totalRemovedRollCount}");
+    }
+
+    static int CountAdjacentPaperRolls(char[,] paperGrid, int centerRowIndex, int centerColumnIndex, int totalRowCount, int totalColumnCount)
+    {
+        int adjacentPaperRollCount = 0;
+
+        for (int rowOffset = -1; rowOffset <= 1; rowOffset++)
+        {
+            for (int columnOffset = -1; columnOffset <= 1; columnOffset++)
+            {
+                if (rowOffset == 0 && columnOffset == 0)
+                    continue;
+
+                int neighborRowIndex = centerRowIndex + rowOffset;
+                int neighborColumnIndex = centerColumnIndex + columnOffset;
+
+                if (neighborRowIndex >= 0 &&
+                    neighborRowIndex < totalRowCount &&
+                    neighborColumnIndex >= 0 &&
+                    neighborColumnIndex < totalColumnCount)
+                {
+                    if (paperGrid[neighborRowIndex, neighborColumnIndex] == '@')
+                        adjacentPaperRollCount++;
+                }
+            }
+        }
+
+        return adjacentPaperRollCount;
     }
 }
-
-Console.WriteLine(totalNumberOfPaperRolls);
